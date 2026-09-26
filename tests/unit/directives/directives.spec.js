@@ -3,10 +3,10 @@ import { mount } from '@vue/test-utils'
 
 import katexDirective from '@/directives/katex-directive'
 import katex from 'katex'
-import renderMathInElement from 'katex/dist/contrib/auto-render.mjs'
+import renderMathInElement from 'katex/contrib/auto-render'
 
 vi.mock('katex')
-vi.mock('katex/dist/contrib/auto-render.mjs')
+vi.mock('katex/contrib/auto-render')
 
 const vKatex = katexDirective({})
 

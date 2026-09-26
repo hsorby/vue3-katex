@@ -4,10 +4,10 @@
 import katexDirective from './directives/katex-directive'
 import KatexElement from './components/KatexElement.vue'
 // import VueDOMPurifyHTML from 'vue-dompurify-html'
-import 'katex/dist/contrib/copy-tex.mjs'
-import 'katex/dist/contrib/mhchem.mjs'
-import 'katex/dist/contrib/mathtex-script-type.mjs'
-import 'katex/dist/contrib/render-a11y-string.mjs'
+import 'katex/contrib/copy-tex'
+import 'katex/contrib/mhchem'
+import 'katex/contrib/mathtex-script-type'
+import 'katex/contrib/render-a11y-string'
 
 /**
  * Install function for installing plugin into Vue 3 application.

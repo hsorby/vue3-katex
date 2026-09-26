@@ -19,14 +19,23 @@ export default defineConfig({
     },
     rollupOptions: {
       // Make sure to externalize deps that shouldn't be bundled
-      // into your library
-      external: ['vue', 'katex'],
+      // into your library. KaTeX is matched with a regex so that its
+      // subpath imports (katex/contrib/*) are externalized too; otherwise
+      // a second copy of KaTeX gets bundled via the contrib modules.
+      external: ['vue', /^katex(\/|$)/],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
         globals: {
           vue: 'Vue',
           katex: 'katex',
+          'katex/contrib/auto-render': 'renderMathInElement',
+          // Side-effect only imports; they register themselves with the
+          // global katex when loaded via their own <script> tags.
+          'katex/contrib/copy-tex': 'katex',
+          'katex/contrib/mhchem': 'katex',
+          'katex/contrib/mathtex-script-type': 'katex',
+          'katex/contrib/render-a11y-string': 'katex',
         },
       },
     },
