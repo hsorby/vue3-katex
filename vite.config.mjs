@@ -8,12 +8,12 @@ export default defineConfig({
   resolve: {
     alias: {
       // This maps '@' to your 'src' folder
-      '@': path.resolve(__dirname, 'src') 
+      '@': path.resolve(import.meta.dirname, 'src') 
     }
   },
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/plugin.js'), // Point to your library's main entry file
+      entry: path.resolve(import.meta.dirname, 'src/plugin.js'), // Point to your library's main entry file
       name: 'Vue3Katex', // The global variable name for the UMD build
       fileName: (format) => `vue3-katex.${format}.js`,
     },

@@ -59,7 +59,7 @@
     "vue-dompurify-html": "^5.3.0"
   },
   "peerDependencies": {
-    "katex": "^0.17.0",
+    "katex": "^0.18.0",
     "vue": "^3.2.22"
   },
   "devDependencies": {

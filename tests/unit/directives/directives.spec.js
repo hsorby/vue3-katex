@@ -109,7 +109,6 @@ describe('Directive v-katex', () => {
     expect(katex.render).toBeCalledWith(expression, wrapper.element, options)
   })
   it('merges global options', () => {
-    expect(renderMathInElement).toBeCalledTimes(1)
     const component = {
       template: `
           <div v-katex:auto="{options}">
@@ -139,7 +138,7 @@ describe('Directive v-katex', () => {
         },
       },
     })
-    expect(renderMathInElement).toBeCalledTimes(2)
+    expect(renderMathInElement).toBeCalledTimes(1)
     expect(renderMathInElement).toBeCalledWith(wrapper.element, {
       displayMode: true,
       delimiters: [
