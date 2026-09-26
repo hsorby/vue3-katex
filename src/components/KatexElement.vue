@@ -1,5 +1,7 @@
+<!-- Not <component :is> with v-html: Vue's SSR compiler drops the v-html there. -->
 <template>
-  <component :is="tag" v-html="math" />
+  <div v-if="displayMode" v-html="math" />
+  <span v-else v-html="math" />
 </template>
 
 <script>
@@ -9,11 +11,13 @@ export default {
 </script>
 
 <script setup>
-// Would like to use v-dompurify-html in the component instead of v-html in the template.
-// But I haven't because it changes the test answers.
-import { computed, inject, toRefs, ref } from 'vue'
+import { computed, inject } from 'vue'
 import katex from 'katex'
-import merge from 'deepmerge'
+import { mergeOptions } from '../utils/options'
+
+// Unlike KaTeX itself, the component does not throw on invalid TeX by default:
+// the error is rendered in `errorColor` instead. Set `throwOnError` to change this.
+const DEFAULT_OPTIONS = { throwOnError: false }
 
 const removeUndefined = (obj) => {
   const newObj = {}
@@ -28,7 +32,6 @@ const removeUndefined = (obj) => {
 const props = defineProps({
   expression: {
     type: String,
-    default: '',
     required: true,
   },
   displayMode: {
@@ -69,43 +72,26 @@ const props = defineProps({
   },
 })
 
-const {
-  displayMode,
-  expression,
-  throwOnError,
-  errorColor,
-  macros,
-  colorIsTextColor,
-  maxSize,
-  maxExpand,
-  allowedProtocols,
-  strict,
-} = toRefs(props)
-
-const globalOptions = ref({})
-globalOptions.value = inject('$katexOptions')
+const globalOptions = inject('$katexOptions', {})
 
 const options = computed(() => {
-  return merge(
-    globalOptions.value,
+  return mergeOptions(
+    { ...DEFAULT_OPTIONS, ...globalOptions },
     removeUndefined({
-      displayMode: displayMode.value,
-      throwOnError: throwOnError.value,
-      errorColor: errorColor.value,
-      macros: macros.value,
-      colorIsTextColor: colorIsTextColor.value,
-      maxSize: maxSize.value,
-      maxExpand: maxExpand.value,
-      allowedProtocols: allowedProtocols.value,
-      strict: strict.value,
-    })
+      displayMode: props.displayMode,
+      throwOnError: props.throwOnError,
+      errorColor: props.errorColor,
+      macros: props.macros,
+      colorIsTextColor: props.colorIsTextColor,
+      maxSize: props.maxSize,
+      maxExpand: props.maxExpand,
+      allowedProtocols: props.allowedProtocols,
+      strict: props.strict,
+    }),
   )
 })
 
-const tag = computed(() => {
-  return displayMode.value ? 'div' : 'span'
-})
 const math = computed(() => {
-  return katex.renderToString(expression.value, options.value)
+  return katex.renderToString(props.expression, options.value)
 })
 </script>

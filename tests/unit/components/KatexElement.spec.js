@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import KatexElement from '@/components/KatexElement.vue'
 import VueKatex from '@/plugin.js'
@@ -84,8 +84,8 @@ describe('KatexElement.vue', () => {
             },
           ],
         ],
-        shallow: true,
       },
+      shallow: true,
     })
 
     const options = wrapper.vm.options
@@ -121,8 +121,8 @@ describe('KatexElement.vue', () => {
             },
           ],
         ],
-        shallow: true,
       },
+      shallow: true,
     })
 
     const options = wrapper.vm.options
@@ -162,8 +162,8 @@ describe('KatexElement.vue', () => {
       },
       global: {
         plugins: [VueKatex],
-        shallow: true,
       },
+      shallow: true,
     })
 
     const options = wrapper.vm.options
@@ -198,8 +198,8 @@ describe('KatexElement.vue', () => {
       },
       global: {
         plugins: [VueKatex],
-        shallow: true,
       },
+      shallow: true,
     })
     expect(wrapper.find('div').exists()).toBe(true)
     expect(wrapper.html().substring(0, 4)).toBe('<div')
@@ -217,5 +217,66 @@ describe('KatexElement.vue', () => {
     })
     const expectedInnerHtml = katex.renderToString(expression)
     expect(wrapper.html()).toContain(expectedInnerHtml)
+  })
+
+  it('does not throw on invalid TeX by default', () => {
+    const wrapper = mount(KatexElement, {
+      props: { expression: '\\frac{' },
+      global: {
+        plugins: [VueKatex],
+      },
+    })
+    expect(wrapper.find('.katex-error').exists()).toBe(true)
+  })
+
+  it('throws on invalid TeX when throwOnError is set globally', () => {
+    expect(() =>
+      mount(KatexElement, {
+        props: { expression: '\\frac{' },
+        global: {
+          plugins: [[VueKatex, { katexOptions: { throwOnError: true } }]],
+        },
+      }),
+    ).toThrow(katex.ParseError)
+  })
+
+  it('works without the plugin and without warnings', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = mount(KatexElement, { props: { expression: 'x' } })
+    expect(wrapper.find('.katex').exists()).toBe(true)
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it('lets \\gdef add to the macros prop', () => {
+    const macros = {}
+    mount(KatexElement, {
+      props: { expression: '\\gdef\\answer{42}', macros },
+      global: {
+        plugins: [VueKatex],
+      },
+    })
+    expect(macros).toHaveProperty('\\answer')
+  })
+
+  it('lets \\gdef add to the global macros', () => {
+    const macros = {}
+    mount(KatexElement, {
+      props: { expression: '\\gdef\\answer{42}' },
+      global: {
+        plugins: [[VueKatex, { katexOptions: { macros } }]],
+      },
+    })
+    expect(macros).toHaveProperty('\\answer')
+  })
+
+  it('lets the allowedProtocols prop narrow the global list', () => {
+    const wrapper = mount(KatexElement, {
+      props: { expression: 'x', allowedProtocols: ['https'] },
+      global: {
+        plugins: [[VueKatex, { katexOptions: { allowedProtocols: ['http', 'https'] } }]],
+      },
+    })
+    expect(wrapper.vm.options.allowedProtocols).toEqual(['https'])
   })
 })

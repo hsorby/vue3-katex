@@ -26,6 +26,8 @@ export default defineConfig({
       // a second copy of KaTeX gets bundled via the contrib modules.
       external: ['vue', /^katex(\/|$)/],
       output: {
+        // The entry has named exports as well as the default export.
+        exports: 'named',
         // Provide global variables to use in the UMD build
         // for externalized deps
         globals: {

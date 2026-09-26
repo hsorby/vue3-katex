@@ -3,11 +3,22 @@
  */
 import katexDirective from './directives/katex-directive'
 import KatexElement from './components/KatexElement.vue'
-// import VueDOMPurifyHTML from 'vue-dompurify-html'
-import 'katex/contrib/copy-tex'
 import 'katex/contrib/mhchem'
-import 'katex/contrib/mathtex-script-type'
-import 'katex/contrib/render-a11y-string'
+
+const ignore = () => {}
+
+/**
+ * Load the KaTeX extensions that use the DOM as soon as they are imported.
+ * They are skipped when there is no document (e.g. server-side rendering).
+ * Load failures are ignored: with the UMD build these extensions are expected
+ * to be loaded with their own <script> tags.
+ */
+const loadBrowserExtensions = () => {
+  if (typeof document === 'undefined') {
+    return
+  }
+  Promise.all([import('katex/contrib/copy-tex'), import('katex/contrib/mathtex-script-type')]).catch(ignore)
+}
 
 /**
  * Install function for installing plugin into Vue 3 application.
@@ -18,10 +29,11 @@ import 'katex/contrib/render-a11y-string'
 function install(app, options) {
   const katexOptions = (options && options.katexOptions) || {}
   const vKatex = katexDirective(katexOptions)
-  // app.use(VueDOMPurifyHTML)
   app.directive(vKatex.name, vKatex.directive)
   app.component(KatexElement.name, KatexElement)
   app.provide('$katexOptions', katexOptions)
+  loadBrowserExtensions()
 }
 
+export { install, KatexElement, katexDirective }
 export default install

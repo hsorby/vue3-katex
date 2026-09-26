@@ -52,13 +52,36 @@ createApp(App).use(Vue3Katex, {
 
 Now you are all setup to use the plugin.
 
+### Registering the component or directive yourself
+
+The component, the directive factory and the install function are also available as named exports:
+
+```js
+import { KatexElement, katexDirective } from 'vue3-katex'
+
+const vKatex = katexDirective({
+  //... KaTeX options for this directive
+})
+app.component('KatexElement', KatexElement)
+app.directive('katex', vKatex.directive)
+```
+
+TypeScript declarations are included.
+
+### Server-side rendering
+
+The plugin can be imported and installed during server-side rendering. `KatexElement` renders on the server; the `v-katex` directive renders when the page is mounted in the browser.
+
 # Usage
 
 There are two ways to use vue3-katex, using the `KatexElement` component or using the `v-katex` directive.
 
 ### Katex Options
 
-Options applied globally through the plugin will be merged with any options applied locally to the `v-katex` directive or `KatexElement`. Locally applied options have a higher precedence and will override globally applied options, the exception to this is any KaTeX option of the type `object` or `array`. These will be merged with the resultant option containing all global and local keys or elements.
+Options applied globally through the plugin will be merged with any options applied locally to the `v-katex` directive or `KatexElement`. Locally applied options have a higher precedence and will override globally applied options, the exception to this is any KaTeX option of the type `object` or `array`. These will be merged with the resultant option containing all global and local keys or elements, with two exceptions:
+
+- `allowedProtocols`: a local list replaces the global list, so a component or directive can allow fewer protocols than the global options.
+- `macros`: if only the global or only the local options define `macros`, that object is passed to KaTeX as is, so `\gdef` can add macros to it (see the `macros` prop below). If both define `macros`, they are merged into a new object and `\gdef` changes are not written back to either.
 
 Katex options can be applied globally when the plugin is used like so:
 
@@ -90,6 +113,10 @@ To add KaTeX options, use an object literal instead:
 <div v-katex="{ expression: '\\frac{a_i}{1+x}', options: { throwOnError: false }}"></div>
 ```
 
+If the expression is `null` or `undefined` (for example while data is loading), nothing is rendered. The directive only renders again when the expression or options change.
+
+The directive uses KaTeX's default of `throwOnError: true`, so invalid TeX throws an error. Set `throwOnError: false` in the global or local options to show the error in the output instead.
+
 ### Using the katex directive with auto-render
 
 ```html
@@ -102,12 +129,20 @@ Options can be applied as follows
 <div v-katex:auto="{ options }">\(\frac{a_i}{1+x}\)</div>
 ```
 
+The math is rendered again whenever the component that contains the element updates, so reactive content such as `<div v-katex:auto>{{ text }}</div>` stays up to date. Content that belongs to a child component inside the element is not rendered again when only that child component updates.
+
 See KaTeX documentation for [auto-render](https://katex.org/docs/autorender.html) for more information.
 
 ### Using the KatexElement component
 
 ```html
-<katex-element expression="'\\frac{a_i}{1+x}'" />
+<katex-element :expression="'\\frac{a_i}{1+x}'" />
+```
+
+or, without binding (a plain attribute, so the backslash is not escaped):
+
+```html
+<katex-element expression="\frac{a_i}{1+x}" />
 ```
 
 Through props `KatexElement` supports all of the same options that KaTeX supports.
@@ -116,9 +151,9 @@ Through props `KatexElement` supports all of the same options that KaTeX support
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <div><h3>`expression`</h3> <p>**Type:** `String` **Required**</p> A TeX expression to be displayed.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | <div><h3>`display-mode`</h3> <p>**Type:** `Boolean` **Default:** `false`</p> If true the math will be rendered in display mode, which will put the math in display style (so `\int` and `\sum` are large, for example), and will center the math on the page on its own line. If false the math will be rendered in inline mode.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| <div><h3>`throw-on-error`</h3><p>**Type:** `Boolean` **Default:** `false`</p> If true, KaTeX will throw a `ParseError` when it encounters an unsupported command or invalid LaTeX. If false, KaTeX will render unsupported commands as text, and render invalid LaTeX as its source code with hover text giving the error, in the color given by `errorColor`.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| <div><h3>`throw-on-error`</h3><p>**Type:** `Boolean` **Default:** `false`</p> If true, KaTeX will throw a `ParseError` when it encounters an unsupported command or invalid LaTeX. Unlike KaTeX itself, `KatexElement` defaults to false. If false, KaTeX will render unsupported commands as text, and render invalid LaTeX as its source code with hover text giving the error, in the color given by `errorColor`.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | <div> <h3>`error-color="#CC0000"`</h3> <p>**Type:** `String` **Default:** `#CC0000` </p> A color string given in the format "#XXX" or "#XXXXXX". This option determines the color that unsupported commands and invalid LaTeX are rendered in when throwOnError is set to false.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| <div><h3>`macros`</h3><p>**Type:** `Object` **Default:** `null`</p> A collection of custom macros. Each macro is a property with a name like `\name` (written `"\\name"` in JavaScript) which maps to a string that describes the expansion of the macro, or a function that accepts an instance of `MacroExpander` as first argument and returns the expansion as a string. `MacroExpander` is an internal API and subject to non-backwards compatible changes. See [src/macros.js](https://github.com/KaTeX/KaTeX/blob/master/src/macros.js) for its usage. Single-character keys can also be included in which case the character will be redefined as the given macro (similar to TeX active characters). This object will be modified if the LaTeX code defines its own macros via `\gdef`, which enables consecutive calls to KaTeX to share state.</div> |
+| <div><h3>`macros`</h3><p>**Type:** `Object` **Default:** `null`</p> A collection of custom macros. Each macro is a property with a name like `\name` (written `"\\name"` in JavaScript) which maps to a string that describes the expansion of the macro, or a function that accepts an instance of `MacroExpander` as first argument and returns the expansion as a string. `MacroExpander` is an internal API and subject to non-backwards compatible changes. See [src/macros.js](https://github.com/KaTeX/KaTeX/blob/master/src/macros.js) for its usage. Single-character keys can also be included in which case the character will be redefined as the given macro (similar to TeX active characters). This object will be modified if the LaTeX code defines its own macros via `\gdef`, which enables consecutive calls to KaTeX to share state (unless global `macros` are also set, see [Katex Options](#katex-options)).</div> |
 | <div><h3>`color-is-text-color`</h3><p>**Type:** `Boolean` **Default:** `false`</p> If true, `\color` will work like LaTeX's `\textcolor`, and take two arguments (e.g., `\color{blue}{hello}`), which restores the old behavior of KaTeX (pre-0.8.0). If false, `\color` will work like LaTeX's `\color`, and take one argument (e.g., `\color{blue}hello`). In both cases, `\textcolor` works as in LaTeX (e.g., `\textcolor{blue}{hello}`).</div>                                                                                                                                                                                                                                                                                                                                                                                                             |
 | <div><h3>`max-size="Infinity"`</h3><p>**Type:** `Number` **Default:** `Infinity`</p> All user-specified sizes, e.g. in `\rule{500em}{500em}`, will be capped to `maxSize` ems. If set to `Infinity` (the default), users can make elements and spaces arbitrarily large.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | <div><h3>`max-expand="1000"`</h3><p>**Type:** `Number` **Default:** `1000`</p> Limit the number of macro expansions to the specified number, to prevent e.g. infinite macro loops. If set to `Infinity`, the macro expander will try to fully expand as in LaTeX.</div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -129,7 +164,7 @@ See also: [KaTeX Documentation](https://katex.org/docs/options.html)
 
 # Example
 
-As an example, a super simple website is available [here](https://vue3-plugins.github.io/) and the source code for this website is avaiable [here](https://github.com/vue3-plugins/vue3-plugins.github.io).
+As an example, a super simple website is available [here](https://vue3-repos.github.io/) and the source code for this website is avaiable [here](https://github.com/vue3-repos/vue3-repos.github.io).
 
 # License
 
