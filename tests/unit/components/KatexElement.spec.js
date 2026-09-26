@@ -4,6 +4,40 @@ import KatexElement from '@/components/KatexElement.vue'
 import VueKatex from '@/plugin.js'
 import katex from 'katex'
 
+// KaTeX 0.18 added a `katex-` prefix to some of its internal class names
+// (e.g. `base` -> `katex-base`). Rewrite any unprefixed names to the 0.18
+// form so the same snapshots work with both KaTeX 0.17 and 0.18.
+const PREFIXED_IN_0_18 = new Set([
+  'accent',
+  'base',
+  'fix',
+  'hdashline',
+  'hline',
+  'inner',
+  'newline',
+  'overlay',
+  'overline',
+  'root',
+  'rule',
+  'sizing',
+  'smash',
+  'sout',
+  'stretchy',
+  'strut',
+  'tag',
+  'thinbox',
+  'underline',
+  'vbox',
+])
+const normaliseKatexClasses = (html) =>
+  html.replace(/class="([^"]*)"/g, (_, classes) => {
+    const normalised = classes
+      .split(' ')
+      .map((c) => (PREFIXED_IN_0_18.has(c) ? `katex-${c}` : c))
+      .join(' ')
+    return `class="${normalised}"`
+  })
+
 describe('KatexElement.vue', () => {
   it('matches snapshot - inline mode', () => {
     const wrapper = mount(KatexElement, {
@@ -15,7 +49,7 @@ describe('KatexElement.vue', () => {
       },
       shallow: true,
     })
-    expect(wrapper.html()).toMatchSnapshot()
+    expect(normaliseKatexClasses(wrapper.html())).toMatchSnapshot()
   })
 
   it('matches snapshot - display mode', () => {
@@ -29,7 +63,7 @@ describe('KatexElement.vue', () => {
       },
       shallow: true,
     })
-    expect(wrapper.html()).toMatchSnapshot()
+    expect(normaliseKatexClasses(wrapper.html())).toMatchSnapshot()
   })
 
   it('respects global options', () => {

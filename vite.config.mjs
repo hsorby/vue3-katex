@@ -15,7 +15,9 @@ export default defineConfig({
     lib: {
       entry: path.resolve(import.meta.dirname, 'src/plugin.js'), // Point to your library's main entry file
       name: 'Vue3Katex', // The global variable name for the UMD build
-      fileName: (format) => `vue3-katex.${format}.js`,
+      // package.json has "type": "module", so the UMD build needs a .cjs
+      // extension for Node's require() to treat it as CommonJS.
+      fileName: (format) => `vue3-katex.${format}.${format === 'umd' ? 'cjs' : 'js'}`,
     },
     rollupOptions: {
       // Make sure to externalize deps that shouldn't be bundled
