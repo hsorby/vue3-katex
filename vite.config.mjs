@@ -15,9 +15,10 @@ export default defineConfig({
     lib: {
       entry: path.resolve(import.meta.dirname, 'src/plugin.js'), // Point to your library's main entry file
       name: 'Vue3Katex', // The global variable name for the UMD build
-      // package.json has "type": "module", so the UMD build needs a .cjs
-      // extension for Node's require() to treat it as CommonJS.
-      fileName: (format) => `vue3-katex.${format}.${format === 'umd' ? 'cjs' : 'js'}`,
+      // es: for import. cjs: for require(); package.json has "type": "module",
+      // so it needs the .cjs extension. umd: for <script> tags (CDNs).
+      formats: ['es', 'cjs', 'umd'],
+      fileName: (format) => ({ es: 'vue3-katex.es.js', cjs: 'vue3-katex.cjs', umd: 'vue3-katex.umd.js' })[format],
     },
     rollupOptions: {
       // Make sure to externalize deps that shouldn't be bundled
@@ -39,7 +40,6 @@ export default defineConfig({
           'katex/contrib/copy-tex': 'katex',
           'katex/contrib/mhchem': 'katex',
           'katex/contrib/mathtex-script-type': 'katex',
-          'katex/contrib/render-a11y-string': 'katex',
         },
       },
     },

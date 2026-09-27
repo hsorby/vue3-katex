@@ -72,6 +72,40 @@ TypeScript declarations are included.
 
 The plugin can be imported and installed during server-side rendering. `KatexElement` renders on the server; the `v-katex` directive renders when the page is mounted in the browser.
 
+### Using a CDN
+
+vue3-katex can also be used without a build step. When you use a bundler, it loads the KaTeX extensions vue3-katex needs automatically; from a CDN, add a `<script>` tag for each one, after KaTeX and before vue3-katex:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18/dist/katex.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18/dist/katex.min.js"></script>
+
+<!-- Needed for v-katex:auto -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18/dist/contrib/auto-render.min.js"></script>
+<!-- Needed for chemistry: \ce and \pu -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18/dist/contrib/mhchem.min.js"></script>
+<!-- Optional: copy rendered math as TeX -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18/dist/contrib/copy-tex.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue3-katex@0.9"></script>
+
+<div id="app">
+  <katex-element expression="\frac{a_i}{1+x}"></katex-element>
+</div>
+<script>
+  Vue.createApp({})
+    .use(Vue3Katex, {
+      katexOptions: {
+        //... Define globally applied KaTeX options here
+      },
+    })
+    .mount('#app')
+</script>
+```
+
+Without the auto-render script, `v-katex:auto` reports an error saying the extension is missing. Without mhchem, KaTeX treats `\ce` and `\pu` as unknown commands: `KatexElement` shows them in the error colour, and `v-katex` throws a parse error unless `throwOnError` is `false`.
+
 # Usage
 
 There are two ways to use vue3-katex, using the `KatexElement` component or using the `v-katex` directive.

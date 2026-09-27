@@ -4,6 +4,13 @@ import { isEqual, mergeOptions, snapshot } from '../utils/options'
 
 const isObject = (value) => value !== null && typeof value === 'object'
 
+// With the UMD build, KaTeX's auto-render extension is not bundled: it has to
+// be loaded with its own <script> tag, which defines `renderMathInElement`.
+const AUTO_RENDER_MISSING =
+  'vue3-katex: v-katex:auto needs the KaTeX auto-render extension. When loading vue3-katex from a CDN, ' +
+  'add a <script> tag for katex/dist/contrib/auto-render.min.js before vue3-katex. ' +
+  'See https://github.com/vue3-plugins/vue3-katex#using-a-cdn'
+
 // Per-element state:
 // - input: a snapshot of the last rendered input (to skip unchanged updates)
 // - options: the options last rendered with
@@ -174,6 +181,9 @@ const withEmptyTextKept = (root, fn) => {
  * updates the nodes it owns and the content can then be rendered again.
  */
 const autoRender = (el, state) => {
+  if (typeof renderMathInElement !== 'function') {
+    throw new Error(AUTO_RENDER_MISSING)
+  }
   const before = collectChildLists(el)
   // Skip math that is already rendered, as happens on the observer's passes.
   const ignoredClasses = [...(state.options.ignoredClasses || []), 'katex']
