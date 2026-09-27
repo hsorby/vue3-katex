@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vue3-plugins/vue3-katex.git"
+    "url": "git+https://github.com/vue3-repos/vue3-katex.git"
   },
   "scripts": {
     "build-package": "vite build",
