@@ -129,7 +129,7 @@ Options can be applied as follows
 <div v-katex:auto="{ options }">\(\frac{a_i}{1+x}\)</div>
 ```
 
-The math is rendered again whenever the component that contains the element updates, so reactive content such as `<div v-katex:auto>{{ text }}</div>` stays up to date. Content that belongs to a child component inside the element is not rendered again when only that child component updates.
+The math is rendered again whenever the content changes, whether the change comes from the component that contains the element or from a child component inside it. Reactive content such as `<div v-katex:auto>{{ text }}</div>`, `v-if` and `v-for` all stay up to date.
 
 See KaTeX documentation for [auto-render](https://katex.org/docs/autorender.html) for more information.
 

@@ -81,7 +81,7 @@ describe('Directive v-katex', () => {
       },
     })
     expect(renderMathInElement).toBeCalledTimes(1)
-    expect(renderMathInElement).toBeCalledWith(wrapper.element, {})
+    expect(renderMathInElement).toBeCalledWith(wrapper.element, { ignoredClasses: ['katex'] })
   })
   it('respects global options', () => {
     const expression = '\\frac{a_i}{1+x}'
@@ -148,6 +148,7 @@ describe('Directive v-katex', () => {
         { left: '\\(', right: '\\)', display: true },
         { left: '\\[', right: '\\]', display: true },
       ],
+      ignoredClasses: ['katex'],
     })
   })
 
@@ -226,6 +227,11 @@ describe('Directive v-katex', () => {
       wrapper.vm.other++
       await nextTick()
       expect(katex.render).toBeCalledTimes(2)
+    })
+
+    it('can be unmounted', () => {
+      const wrapper = mountCounter('<div v-katex="expression"></div>', { expression: 'x' })
+      expect(() => wrapper.unmount()).not.toThrow()
     })
 
     it('renders again on every update in auto mode', async () => {
