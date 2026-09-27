@@ -1,15 +1,15 @@
 // vite.config.js
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import path from 'path';
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
       // This maps '@' to your 'src' folder
-      '@': path.resolve(import.meta.dirname, 'src') 
-    }
+      '@': path.resolve(import.meta.dirname, 'src'),
+    },
   },
   build: {
     lib: {
@@ -49,4 +49,4 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
-});
+})

@@ -1,12 +1,13 @@
-import globals from 'globals';
-import pluginVue from 'eslint-plugin-vue';
-import { includeIgnoreFile } from '@eslint/compat';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import globals from 'globals'
+import pluginVue from 'eslint-plugin-vue'
+import { includeIgnoreFile } from '@eslint/compat'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import eslintConfigPrettier from 'eslint-config-prettier/flat'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const gitignorePath = path.resolve(__dirname, '.gitignore');
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const gitignorePath = path.resolve(__dirname, '.gitignore')
 
 export default [
   includeIgnoreFile(gitignorePath),
@@ -17,7 +18,6 @@ export default [
     files: ['**/*.vue'],
     rules: {
       'vue/no-v-text-v-html-on-component': 'off',
-      'vue/max-attributes-per-line': 'off',
     },
   },
   {
@@ -50,5 +50,7 @@ export default [
       // e.g., 'semi': ['error', 'always']
     },
   },
-];
 
+  // Turn off rules that are unnecessary or conflict with Prettier. Keep this last.
+  eslintConfigPrettier,
+]

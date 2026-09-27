@@ -25,10 +25,12 @@
   "scripts": {
     "build-package": "vite build",
     "lint": "eslint --config eslint.config.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test:unit": "vitest run",
     "test:update": "vitest -u run",
     "test:coverage": "vitest run --coverage",
-    "prerelease": "yarn run lint && yarn run test:unit && yarn run build-package"
+    "prerelease": "yarn run lint && yarn run format:check && yarn run test:unit && yarn run build-package"
   },
   "author": "Luc Potage",
   "contributors": [
@@ -71,6 +73,7 @@
     "@vue/compiler-dom": "^3.5.43",
     "@vue/test-utils": "^2.5.1",
     "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.12.0",
     "jsdom": "^30.1.1",
