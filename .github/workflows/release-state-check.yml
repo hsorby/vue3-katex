@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    if: github.repository == 'vue3-plugins/vue3-katex'
+    if: github.repository == 'vue3-repos/vue3-katex'
     runs-on: ubuntu-latest
 
     strategy:
